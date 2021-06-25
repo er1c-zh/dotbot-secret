@@ -3,11 +3,12 @@ import dotbot
 import os
 from pyDes import des, ECB, PAD_PKCS5
 import base64
+import getpass
 
 
 class Brew(dotbot.Plugin):
-    _baseEncrypted = '/encrypt'
-    _baseDecrypted = '/decrypt'
+    _BASE_ENCRYPTED = './encrypt'
+    _BASE_DECRYPTED = './decrypt'
     _key = 'default_key'
     _crypto = None
     _action = None
@@ -22,35 +23,49 @@ class Brew(dotbot.Plugin):
         pwd = self._context.base_directory()
         log = self._log
 
-        src = pwd + self._baseDecrypted
-        dest = pwd + self._baseEncrypted
-        self._action = self.ACTION_ENCRYPT
+        log.info(data)
 
-        if directive == self.ACTION_DECRYPT:
-            src = pwd + self._baseEncrypted
-            dest = pwd + self._baseDecrypted
-            self._action = self.ACTION_DECRYPT
-
-        log.info('Load from ' + src + ', write to ' + dest + '.')
-
+        # 获取加解密的key
         try:
-            key = raw_input('[dotbot-secret]Please input key:')
+            key = getpass.getpass('[dotbot-secret]Please input key:')
         except BaseException as e:
             log.error(e)
             return True
-
-        log.info('Use key [' + key + '].')
-
         self._key = key
         try:
             self.gen_crypto()
-            err = self.work(src, dest)
-            if not (err is None):
-                log.error(err)
-                return True
         except BaseException as e:
             log.error(e)
             return True
+
+        self._action = directive
+
+        defaults = self._context.defaults().get(self._action, {})
+        src_path = defaults.get('src_path',
+                                self._BASE_ENCRYPTED if self._action == self.ACTION_DECRYPT else self._BASE_DECRYPTED)
+        dst_path = defaults.get('dst_path',
+                                self._BASE_DECRYPTED if self._action == self.ACTION_DECRYPT else self._BASE_ENCRYPTED)
+
+        for item in data:
+            _src_path = src_path
+            _dst_path = dst_path
+            if isinstance(item, dict):
+                _src_path = item.get('src_path', src_path)
+                _dst_path = item.get('dst_path', dst_path)
+            elif isinstance(item, list):
+                _src_path = item[0] if len(item) > 0 else src_path
+                _dst_path = item[1] if len(item) > 1 else dst_path
+            src = os.path.join(pwd, _src_path)
+            dst = os.path.join(pwd, _dst_path)
+            log.info('Load from ' + src + ', write to ' + dst + '.')
+            try:
+                err = self.work(src, dst)
+                if not (err is None):
+                    log.error(err)
+                    return True
+            except BaseException as e:
+                log.error(e)
+                return True
 
         return True
 
