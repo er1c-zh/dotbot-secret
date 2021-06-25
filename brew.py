@@ -1,7 +1,7 @@
 # coding=utf-8
 import dotbot
 import os
-from pyDes import des, ECB, PAD_PKCS5
+from pyDes import triple_des as des, ECB, PAD_PKCS5
 import base64
 import getpass
 
@@ -23,15 +23,21 @@ class Brew(dotbot.Plugin):
         pwd = self._context.base_directory()
         log = self._log
 
-        log.info(data)
+        log.debug(data)
 
         # 获取加解密的key
         try:
             key = getpass.getpass('[dotbot-secret]Please input key:')
+            if self._action == self.ACTION_ENCRYPT:
+                repeat_key = getpass.getpass('[dotbot-secret]Please repeat key:')
+                if not key == repeat_key:
+                    log.error('Two keys are not same, exit.')
+                    return False
         except BaseException as e:
             log.error(e)
             return True
         self._key = key
+        log.debug('Use key ' + self._key + '.')
         try:
             self.gen_crypto()
         except BaseException as e:
@@ -69,11 +75,19 @@ class Brew(dotbot.Plugin):
 
         return True
 
+    KEY_LEN = 24
+
     def gen_crypto(self):
-        pad_len = 8 - len(self._key) % 8
+        self._log.debug('input key is ' + self._key)
         key = self._key
+        if len(key) > self.KEY_LEN:
+            key = key[0:self.KEY_LEN]
+
+        pad_len = self.KEY_LEN - len(key) % self.KEY_LEN
         for _ in range(pad_len):
             key += ' '
+
+        self._log.debug('real key is ==' + key + '==')
         self._crypto = des(key, ECB)
 
     def work(self, src, dest):
