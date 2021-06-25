@@ -25,6 +25,8 @@ class Brew(dotbot.Plugin):
 
         log.debug(data)
 
+        self._action = directive
+
         # 获取加解密的key
         try:
             key = getpass.getpass('[dotbot-secret]Please input key:')
@@ -43,8 +45,6 @@ class Brew(dotbot.Plugin):
         except BaseException as e:
             log.error(e)
             return True
-
-        self._action = directive
 
         defaults = self._context.defaults().get(self._action, {})
         src_path = defaults.get('src_path',
