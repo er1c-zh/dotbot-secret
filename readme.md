@@ -24,7 +24,7 @@ dotbot-secret will encrypt file in `src_path` and write to `dst_path`.
 
 ## sample
 
-![dotbot-secret-usage.gif](https://dsm01pap001files.storage.live.com/y4m2dz3sOKQtRYANK7pI48E0wvdUo3GSWf7EyO-R53wvoJakaEdvGLp4evSEToPBhdkXLzXJ6_0-h0d0reEkxyvwRQYkEGL5iIWF5qiar4v6HuA-IaQ1z0edHTi0eVIh54NZDtQ9fQOzHXigAvxpDkxKD_qKajSmYkwaTy00hmJM43hsZm8lkVe0Mdj3veKdOWm?width=1162&height=609&cropmode=none)
+![dotbot-secret-usage.gif](./doc/dotbot-secret-usage.gif)
 
 ## best practice
 
