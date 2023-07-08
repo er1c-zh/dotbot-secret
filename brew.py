@@ -104,9 +104,9 @@ class Brew(dotbot.Plugin):
             dest_file = open(dest, mode='w')
             origin = ''.join(src_file.readlines())
             if self._action == self.ACTION_DECRYPT:
-                dest_file.writelines(self.decrypt(origin))
+                dest_file.writelines(self.decrypt(origin).decode("utf-8"))
             else:
-                dest_file.writelines(self.encrypt(origin))
+                dest_file.writelines(self.encrypt(origin).decode("utf-8"))
 
             dest_file.flush()
             src_file.close()
